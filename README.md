@@ -2,7 +2,9 @@
 
 ## 🏆 Overview
 
-The FIFA World Cup 2026 Predictor is a full-stack web application that leverages artificial intelligence and machine learning to predict match outcomes throughout the entire tournament. From the group stage to the grand final, this application provides data-driven predictions for all 104 matches, helping fans and analysts understand probable tournament outcomes.
+The FIFA World Cup 2026 Predictor is a full-stack **MERN** (MongoDB, Express, React, Node.js) web application where users create an account, predict scores for every match of the tournament, and compete on a leaderboard as real results come in. From the group stage to the grand final, it covers all 104 matches.
+
+> **Implementation note:** This repository currently ships the full MERN application described below — authentication, predictions, standings, knockout bracket, leaderboard, and an admin results panel — secured and ready to deploy. The ML/Python prediction-engine section further down describes a **planned extension** (probabilistic match forecasting) that is not yet implemented; see that section for details on adding it.
 
 ## ✨ Features
 
@@ -24,21 +26,22 @@ The FIFA World Cup 2026 Predictor is a full-stack web application that leverages
 
 ## 🛠️ Technology Stack
 
-### Frontend
-- **React.js** / **Next.js** - Modern UI framework
-- **Redux Toolkit** / **Zustand** - State management
-- **Tailwind CSS** / **Material-UI** - Styling and components
-- **Recharts** / **D3.js** - Data visualization
-- **Socket.io-client** - Real-time updates
+### Frontend (`client/`)
+- **React 18** with **React Router 6** - UI and client-side routing
+- **Axios** - API client with automatic access-token refresh
+- **React Context** - Auth state management
+- **Bootstrap 5** - Styling and components
+- **react-hot-toast** - Notifications
 
-### Backend
+### Backend (`server/`)
 - **Node.js** with **Express.js** - RESTful API
-- **PostgreSQL** / **MongoDB** - Database
-- **Sequelize** / **Mongoose** - ORM/ODM
-- **JWT** - Authentication
-- **Socket.io** - WebSocket connections
+- **MongoDB** with **Mongoose** - Database and ODM
+- **JWT** (access + refresh tokens) - Authentication
+- **bcryptjs** - Password hashing
+- **helmet, express-rate-limit, express-mongo-sanitize, hpp, express-validator, cors** - Security middleware (see Security section)
+- **Jest + Supertest** - API testing
 
-### AI/ML Components
+### AI/ML Components (planned extension — see note above)
 - **Python** - ML model development
 - **Scikit-learn** - Classical ML algorithms
 - **XGBoost** / **LightGBM** - Gradient boosting
@@ -50,64 +53,89 @@ The FIFA World Cup 2026 Predictor is a full-stack web application that leverages
 
 ### Prerequisites
 ```bash
-Node.js (v16+)
-npm / yarn
-PostgreSQL / MongoDB
-Python (3.8+)
+Node.js (v18+)
+npm
+MongoDB (local install, or a free MongoDB Atlas cluster)
 ```
 
-### Backend Setup
+### Repository layout
+```
+FIFA-World-Cup-2026-Predictor/
+├── server/     # Express + MongoDB API
+├── client/     # React frontend (Create React App)
+├── docker-compose.yml
+└── package.json  # convenience scripts to run both at once
+```
+
+### Quick start (recommended)
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/fifa-worldcup-2026-predictor.git
 cd fifa-worldcup-2026-predictor
 
-# Install backend dependencies
-npm install
+# Install dependencies for both server and client
+npm run install:all
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your database credentials and API keys
+# Configure environment variables (see below), then seed the database
+cd server && cp .env.example .env && npm run seed && cd ..
+cd client && cp .env.example .env && cd ..
 
-# Run database migrations
-npm run migrate
-
-# Start backend server
+# Run backend (port 5000) and frontend (port 3000) together
 npm run dev
 ```
 
-### Frontend Setup
+### Backend Setup (manual)
 ```bash
-# Navigate to frontend directory
-cd client
-
-# Install frontend dependencies
+cd server
 npm install
 
-# Start development server
+cp .env.example .env
+# Edit .env with your MongoDB URI and JWT secrets (see Environment Variables below)
+
+# Seed teams + match schedule (development/staging only — never run against
+# a live production DB you don't intend to reset)
+npm run seed
+
+npm run dev      # nodemon, auto-restarts on changes
+# or: npm start  # production mode
+```
+
+### Frontend Setup (manual)
+```bash
+cd client
+npm install
+
+cp .env.example .env
+# Edit .env if your API isn't on http://localhost:5000
+
 npm start
 ```
 
-### ML Model Setup
+### Docker (both services + MongoDB)
 ```bash
-# Navigate to ML directory
-cd ml
+cd server && cp .env.example .env && cd ..   # fill in real secrets first
+docker-compose up -d --build
 
-# Create virtual environment
+# Seed the containerized database once it's up
+docker-compose exec server node scripts/seed.js
+```
+
+### 🤖 ML Model Setup (planned, not yet implemented)
+The sections below describe a future extension where a Python service produces
+probability-based predictions (win/draw/loss %, xG) that the API would surface
+alongside user predictions. It is **not part of the current codebase** — the
+app currently uses direct user predictions and a points-based leaderboard
+instead of a trained model. If you build this out, the pattern below is a
+reasonable starting point:
+```bash
+cd ml
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install ML dependencies
 pip install -r requirements.txt
-
-# Train models
 python train_models.py
-
-# Start ML API server
 python api_server.py
 ```
 
-## 📊 Machine Learning Models
+## 📊 Machine Learning Models (planned extension, see note above)
 
 ### Data Sources
 - Historical FIFA World Cup results (1930-2022)
@@ -144,32 +172,44 @@ python api_server.py
 
 ### Authentication
 ```
-POST /api/auth/register - User registration
-POST /api/auth/login - User login
-POST /api/auth/refresh - Refresh token
+POST /api/auth/register - Create an account (returns access token, sets refresh cookie)
+POST /api/auth/login    - Log in (rate-limited, account lockout after 5 failed attempts)
+POST /api/auth/refresh  - Exchange the httpOnly refresh cookie for a new access token
+POST /api/auth/logout   - Revoke the current refresh token
+GET  /api/auth/me       - Get the logged-in user's profile (requires Authorization header)
 ```
 
-### Predictions
+### Teams
 ```
-GET /api/predictions/match/:id - Get match prediction
-GET /api/predictions/tournament - Get all tournament predictions
-GET /api/predictions/team/:id - Get team predictions
-GET /api/predictions/stage/:stage - Get stage predictions
-POST /api/predictions/update - Update predictions with new data
-```
-
-### Team Data
-```
-GET /api/teams - Get all teams
-GET /api/teams/:id - Get team details
-GET /api/teams/rankings - Get team rankings
+GET /api/teams              - Get all teams
+GET /api/teams/rankings     - Get teams sorted by FIFA ranking
+GET /api/teams/group/:group - Get teams in a specific group (A-L)
+GET /api/teams/:id          - Get a single team
 ```
 
-### Tournament
+### Matches & Predictions
 ```
-GET /api/tournament/groups - Get group standings
-GET /api/tournament/bracket - Get knockout bracket
-GET /api/tournament/schedule - Get match schedule
+GET  /api/matches               - Get all matches (filter with ?stage=, ?group=, ?team=)
+GET  /api/matches/stage/:stage  - Get matches for a tournament stage
+GET  /api/matches/:id           - Get a single match
+PUT  /api/matches/:id           - Record a result (admin only)
+
+POST /api/predictions           - Submit/update your prediction for a match (auth required)
+GET  /api/predictions/my        - Get your own predictions (auth required)
+GET  /api/predictions/match/:matchId - Get the prediction count for a match
+```
+
+### Standings & Leaderboard
+```
+GET /api/standings/groups          - Group standings (recomputed on each request)
+GET /api/standings/best-third      - Best third-placed teams (top 8 advance)
+GET /api/standings/knockout-bracket - Full knockout bracket by stage
+GET /api/leaderboard?limit=20      - Top users by points
+```
+
+### Health
+```
+GET /api/health - Service liveness check (used by uptime monitors / container orchestrators)
 ```
 
 ## 🎨 User Interface
@@ -202,62 +242,82 @@ GET /api/tournament/schedule - Get match schedule
 
 ## 🔒 Security
 
-- JWT-based authentication
-- Rate limiting on API endpoints
-- Data encryption in transit (HTTPS)
-- Secure database connections
-- Input validation and sanitization
-- CORS configuration
-- Environment variable management
+Implemented in this codebase:
+
+- **Auth**: short-lived JWT access tokens (kept in memory on the client, never in `localStorage`) + long-lived refresh tokens stored as `httpOnly`, `sameSite=strict`, `secure`-in-production cookies, with rotation on every refresh.
+- **Password handling**: bcrypt hashing (12 salt rounds), minimum-length/complexity validation, per-account lockout after 5 failed login attempts (15 min).
+- **Rate limiting**: stricter limits on `/api/auth/*` (20 req/15min) than the rest of the API (300 req/15min), via `express-rate-limit`.
+- **Input validation**: every route that accepts a body/param is validated with `express-validator`; invalid input never reaches a controller.
+- **Injection protection**: `express-mongo-sanitize` strips `$`/`.` operators from user input to block NoSQL injection; Mongoose schemas add a second layer of type/enum validation.
+- **HTTP hardening**: `helmet` (with a restrictive Content-Security-Policy), `hpp` (HTTP parameter pollution guard), request body size capped at 10kb.
+- **CORS**: explicit origin allow-list read from `CORS_ORIGIN`, credentials enabled only for those origins.
+- **Access control**: role-based (`user`/`admin`) middleware on match-result and admin endpoints, re-checked server-side on every request — the Admin UI screen is a convenience, not the security boundary.
+- **Secrets**: all credentials/keys via environment variables (`.env`, gitignored); the app refuses to start if required secrets are missing.
+- **Error handling**: centralized error handler that logs full details server-side but never leaks stack traces to clients in production.
+- **Transport security**: HTTPS is expected to be terminated at your reverse proxy/hosting platform (Nginx, Render, Railway, etc.) in production — `trust proxy` is enabled so secure cookies and rate limiting work correctly behind one.
+- **Non-root containers**: the server Docker image runs as an unprivileged user.
+
+Recommended before going to production: put the app behind HTTPS end-to-end, rotate the JWT secrets, enable MongoDB Atlas IP allow-listing or VPC peering, and consider adding a Web Application Firewall or managed DDoS protection in front of the API.
 
 ## 🚀 Deployment
 
-### Production Setup
+### Option A — Docker Compose (simplest, includes MongoDB)
 ```bash
-# Build frontend
-npm run build
-
-# Start production server
-npm start
-
-# Using Docker
-docker-compose up -d
+cd server && cp .env.example .env   # fill in real secrets, MONGODB_URI is overridden by compose
+docker-compose up -d --build
+docker-compose exec server node scripts/seed.js
 ```
+This runs MongoDB, the API (port 5000), and the React app served by Nginx (port 3000).
+
+### Option B — Separate hosting (e.g. Render/Railway for the API, Vercel/Netlify for the client, MongoDB Atlas for the database)
+```bash
+# Server
+cd server
+npm ci
+npm start          # or let your platform run `node src/server.js`
+
+# Client — build a static bundle and deploy the build/ folder
+cd client
+npm ci
+npm run build
+```
+Point `REACT_APP_API_URL` (client) at your deployed API URL, and `CORS_ORIGIN` (server) at your deployed frontend URL, before building.
 
 ### Environment Variables
+
+**`server/.env`**
 ```env
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=fifa_predictor
-DB_USER=admin
-DB_PASSWORD=secure_password
+NODE_ENV=production
+PORT=5000
 
-# API
-API_PORT=5000
-JWT_SECRET=your_jwt_secret
-ML_API_URL=http://localhost:8000
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/worldcup2026
 
-# Frontend
-REACT_APP_API_URL=http://localhost:5000
-REACT_APP_WS_URL=ws://localhost:5000
+JWT_ACCESS_SECRET=<generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))">
+JWT_REFRESH_SECRET=<generate a different one the same way>
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+
+CORS_ORIGIN=https://your-frontend-domain.com
+LOG_LEVEL=info
 ```
+
+**`client/.env`**
+```env
+REACT_APP_API_URL=https://your-api-domain.com
+```
+
+Never commit either `.env` file — only the `.env.example` templates are tracked in git.
 
 ## 🧪 Testing
 
 ```bash
-# Run backend tests
-npm test
+# Backend integration tests (Jest + Supertest + an in-memory MongoDB instance)
+cd server && npm test
 
-# Run frontend tests
+# Frontend tests
 cd client && npm test
-
-# Run ML tests
-cd ml && pytest
-
-# Run integration tests
-npm run test:integration
 ```
+The included backend tests cover the registration/login flow (weak passwords, duplicate accounts, wrong credentials). Extend `server/tests/` as you add more routes.
 
 ## 📝 License
 
