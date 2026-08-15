@@ -97,9 +97,9 @@ FIFA-World-Cup-2026-Predictor/
 | POST | `/api/predict` | Quick AI prediction |
 | POST | `/api/predict/monte-carlo` | Monte Carlo prediction |
 
----
 ## License
 
 See [LICENSE](LICENSE).
 
+---
 *Fan project — not affiliated with FIFA*
