@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// In production the API lives on the same domain (Vercel rewrite), so use relative URLs.
+const baseURL =
+  process.env.REACT_APP_API_URL ?? (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
 
 // withCredentials lets the browser send/receive the httpOnly refresh-token cookie.
 const api = axios.create({ baseURL, withCredentials: true });

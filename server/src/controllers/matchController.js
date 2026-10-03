@@ -55,7 +55,8 @@ const updateMatchResult = asyncHandler(async (req, res) => {
   match.awayScore = awayScore;
   match.status = status || 'Completed';
 
-  if (match.status === 'Completed' && !wasCompleted) {
+  // Only group-stage results feed the group table (knockout games must not).
+  if (match.status === 'Completed' && !wasCompleted && match.stage === 'Group Stage') {
     const home = match.homeTeam;
     const away = match.awayTeam;
 
@@ -89,8 +90,8 @@ const updateMatchResult = asyncHandler(async (req, res) => {
 
   await match.save();
 
-  // Award prediction points now that the real result is known.
-  await awardPredictionPoints(match);
+  // Award prediction points only once the result is final.
+  if (match.status === 'Completed') await awardPredictionPoints(match);
 
   res.json({ success: true, data: match });
 });

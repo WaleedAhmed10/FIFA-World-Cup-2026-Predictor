@@ -42,14 +42,14 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
   .split(',')
   .map((o) => o.trim());
 
+// Same-origin requests (the Vercel deployment serves client + API from one domain) are
+// always allowed; other origins must be listed in CORS_ORIGIN.
 app.use(
-  cors({
-    origin(origin, callback) {
-      // allow non-browser tools (curl, server-to-server) with no origin header
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true
+  cors((req, callback) => {
+    const origin = req.header('Origin');
+    const sameOrigin = origin && origin === `${req.protocol}://${req.get('host')}`;
+    const allowed = !origin || sameOrigin || allowedOrigins.includes(origin);
+    callback(allowed ? null : new Error('Not allowed by CORS'), { origin: allowed, credentials: true });
   })
 );
 

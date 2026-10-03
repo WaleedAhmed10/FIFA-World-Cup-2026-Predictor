@@ -1,3 +1,4 @@
+// Local / Docker entry point. (On Vercel the entry is /api/index.js.)
 require('dotenv').config();
 const connectDB = require('./config/db');
 const logger = require('./utils/logger');
@@ -13,10 +14,17 @@ if (missing.length) {
 const PORT = process.env.PORT || 5000;
 
 const start = async () => {
-  await connectDB();
-  const server = app.listen(PORT, () => logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`));
+  try {
+    await connectDB();
+  } catch (err) {
+    logger.error(`MongoDB connection error: ${err.message}`);
+    process.exit(1);
+  }
 
-  // Fail loudly instead of leaving the process in a broken state.
+  const server = app.listen(PORT, () =>
+    logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`)
+  );
+
   process.on('unhandledRejection', (err) => {
     logger.error(`Unhandled rejection: ${err.message}`);
     server.close(() => process.exit(1));
