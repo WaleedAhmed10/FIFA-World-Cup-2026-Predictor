@@ -1,4 +1,5 @@
 {
+  "framework": null,
   "buildCommand": "npm install --prefix client && CI=false npm run build --prefix client",
   "outputDirectory": "client/build",
   "rewrites": [
