@@ -18,6 +18,19 @@ A **MERN Stack** web app that lets you build group stages, run tournament simula
 | **Simulate** | Watch the World Cup play out match-by-match from groups to the Final |
 | **Results** | View champion, tournament stats, timeline, share results |
 
+## Tournament datasets
+
+The homepage reads the group draw, group-stage fixtures, and knockout schedule from
+`datasets/groups.csv`, `datasets/matches.csv`, and `datasets/knockout.csv`. The client
+copies these source files into its public data folder automatically before starting,
+building, or testing, so the website always uses the repository's CSV datasets.
+
+Build the Docker image from the repository root so the source datasets are available:
+
+```bash
+docker build -f client/Dockerfile -t fifa-world-cup-2026 .
+```
+
 ## AI / ML (Simple & Easy to Understand)
 
 The ML lives in `server/ml/predictor.js`:

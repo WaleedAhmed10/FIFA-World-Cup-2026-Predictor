@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { SimulatorProvider } from './context/SimulatorContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
@@ -17,6 +18,7 @@ import NotFound from './pages/NotFound';
 function App() {
   return (
     <AuthProvider>
+      <SimulatorProvider>
       <BrowserRouter>
         <div className="App">
           <Toaster position="top-right" />
@@ -34,6 +36,7 @@ function App() {
           </Routes>
         </div>
       </BrowserRouter>
+      </SimulatorProvider>
     </AuthProvider>
   );
 }

@@ -24,7 +24,9 @@ services:
       MONGODB_URI: mongodb://mongo:27017/worldcup2026
 
   client:
-    build: ./client
+    build:
+      context: .
+      dockerfile: client/Dockerfile
     restart: unless-stopped
     depends_on:
       - server
