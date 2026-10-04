@@ -3,7 +3,7 @@ const path = require('path');
 
 const sourceDirectory = path.resolve(__dirname, '..', '..', 'datasets');
 const publicDirectory = path.resolve(__dirname, '..', 'public', 'datasets');
-const files = ['groups.csv', 'matches.csv', 'knockout.csv'];
+const files = ['groups.csv', 'knockout.csv'];
 
 fs.mkdirSync(publicDirectory, { recursive: true });
 

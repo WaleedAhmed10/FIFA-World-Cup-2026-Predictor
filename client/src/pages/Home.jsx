@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { GROUP_MATCHES, TEAM_BY_ID } from '../data/tournament';
 import { parseCsv } from '../utils/csv';
 
 const DATASETS = [
   { key: 'groups', path: '/datasets/groups.csv' },
-  { key: 'matches', path: '/datasets/matches.csv' },
   { key: 'knockout', path: '/datasets/knockout.csv' }
 ];
 
@@ -27,7 +27,7 @@ const Home = () => {
     }))
       .then((entries) => {
         const datasets = Object.fromEntries(entries);
-        if (!datasets.groups.length || !datasets.matches.length || !datasets.knockout.length) {
+        if (!datasets.groups.length || !datasets.knockout.length) {
           throw new Error('One or more tournament CSV files contain no data.');
         }
         setData(datasets);
@@ -49,8 +49,8 @@ const Home = () => {
     [activeGroup, data]
   );
   const selectedMatches = useMemo(
-    () => data?.matches.filter((match) => match.group === activeGroup) || [],
-    [activeGroup, data]
+    () => GROUP_MATCHES.filter((match) => match.group === activeGroup),
+    [activeGroup]
   );
   const knockoutRounds = useMemo(() => {
     if (!data) return [];
@@ -99,7 +99,7 @@ const Home = () => {
           <>
             <div className="home-stats" aria-label="Tournament data at a glance">
               <div><span>TEAMS IN THE DRAW</span><strong>{data.groups.length}<i> / 48</i></strong></div>
-              <div><span>GROUP-STAGE FIXTURES</span><strong>{data.matches.length}<i> MATCHES</i></strong></div>
+              <div><span>GROUP-STAGE FIXTURES</span><strong>{GROUP_MATCHES.length}<i> MATCHES</i></strong></div>
               <div><span>ROAD TO THE FINAL</span><strong>{data.knockout.length}<i> KNOCKOUTS</i></strong></div>
               <div className="home-stat-source"><span>THE SOURCE</span><strong>YOUR CSVs<i> / LIVE IN THE APP</i></strong></div>
             </div>
@@ -143,15 +143,18 @@ const Home = () => {
                 </div>
                 <div className="home-fixture-card">
                   <div className="home-card-topline"><span>THE FIXTURES</span><span>GROUP {activeGroup}</span></div>
-                  {selectedMatches.map((match) => (
-                    <div className="home-fixture-row" key={`${match.group}-${match.matchday}-${match.team1}-${match.team2}`}>
-                      <div className="home-fixture-date"><strong>{match.date_et}</strong><span>MD {match.matchday}</span></div>
-                      <div className="home-fixture-teams"><strong>{match.team1}</strong><span>vs</span><strong>{match.team2}</strong></div>
-                      <div className="home-fixture-city">{match.venue_city}</div>
-                    </div>
-                  ))}
-                  <Link className="home-card-link" to="/groups">
-                    Enter your score predictions <span aria-hidden="true">↗</span>
+                  {selectedMatches.map((match) => {
+                    const home = TEAM_BY_ID[match.homeId];
+                    const away = TEAM_BY_ID[match.awayId];
+                    return (
+                      <div className="home-fixture-row" key={match.id}>
+                        <div className="home-fixture-date"><strong>{match.date}</strong><span>MD {match.matchday}</span></div>
+                        <div className="home-fixture-teams"><strong>{home.name}</strong><span>vs</span><strong>{away.name}</strong></div>
+                      </div>
+                    );
+                  })}
+                  <Link className="home-card-link" to={`/groups?group=${activeGroup.toLowerCase()}`}>
+                    Predict scores in the group simulator <span aria-hidden="true">↗</span>
                   </Link>
                 </div>
               </div>

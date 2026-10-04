@@ -762,15 +762,13 @@ body { background: var(--home-paper); }
 .home-card-link:hover { color: #567c32; }
 
 .home-fixture-card { background: #fff; }
-.home-fixture-row { display: grid; grid-template-columns: 89px 1fr auto; align-items: center; gap: 11px; min-height: 53px; border-bottom: 1px solid #e8ebe4; }
+.home-fixture-row { display: grid; grid-template-columns: 89px 1fr; align-items: center; gap: 11px; min-height: 53px; border-bottom: 1px solid #e8ebe4; }
 .home-fixture-date { display: flex; flex-direction: column; gap: 3px; }
 .home-fixture-date strong { color: var(--home-ink); font-size: 0.7rem; }
 .home-fixture-date span { color: #8b9389; font-size: 0.56rem; font-weight: 700; text-transform: uppercase; }
 .home-fixture-teams { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
 .home-fixture-teams strong { color: var(--home-ink); font-size: 0.72rem; }
 .home-fixture-teams span { color: #9aa096; font-size: 0.59rem; }
-.home-fixture-city { color: #7a8479; font-size: 0.64rem; text-align: right; }
-
 .home-knockout-section { margin: 0 -24px; padding: 72px 24px 59px; background: #e9ede4; }
 .home-knockout-heading { max-width: 1170px; margin: 0 auto 30px; }
 .home-button-dark { flex: 0 0 auto; background: var(--home-green); color: #fff; }
@@ -838,7 +836,6 @@ body { background: var(--home-paper); }
   .home-sun { width: 130px; height: 130px; }
   .home-hero-stamp { right: 8%; width: 69px; height: 69px; }
   .home-fixture-row { grid-template-columns: 70px 1fr; gap: 8px; padding: 7px 0; }
-  .home-fixture-city { grid-column: 2; text-align: left; }
   .home-fixture-teams { gap: 5px; }
   .home-fixture-teams strong { font-size: 0.66rem; }
   .home-team-card, .home-fixture-card { padding-right: 15px; padding-left: 15px; }

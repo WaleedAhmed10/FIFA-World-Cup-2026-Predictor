@@ -20,10 +20,10 @@ A **MERN Stack** web app that lets you build group stages, run tournament simula
 
 ## Tournament datasets
 
-The homepage reads the group draw, group-stage fixtures, and knockout schedule from
-`datasets/groups.csv`, `datasets/matches.csv`, and `datasets/knockout.csv`. The client
-copies these source files into its public data folder automatically before starting,
-building, or testing, so the website always uses the repository's CSV datasets.
+The homepage reads the group draw and knockout schedule from `datasets/groups.csv` and
+`datasets/knockout.csv`. Group-stage fixtures are shared with the group simulator so
+predictions and fixture previews use the same schedule. The client copies the source
+CSVs into its public data folder automatically before starting, building, or testing.
 
 Build the Docker image from the repository root so the source datasets are available:
 

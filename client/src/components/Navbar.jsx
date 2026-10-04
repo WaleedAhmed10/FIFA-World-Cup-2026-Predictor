@@ -23,7 +23,6 @@ const Navbar = () => {
         <NavLink to="/" end>HOME</NavLink>
         <NavLink to="/groups">GROUP STAGE</NavLink>
         <NavLink to="/knockout">KNOCKOUT</NavLink>
-        <NavLink to="/matches">MATCHES</NavLink>
         {user && <NavLink to="/leaderboard">LEADERBOARD</NavLink>}
         {user?.role === 'admin' && <NavLink to="/admin">ADMIN</NavLink>}
         <span className="uz-nav-spacer" />
