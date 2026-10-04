@@ -37,7 +37,7 @@ const Groups = () => {
     <div className="uz-page">
       <div className="uz-wrap">
         <nav className="uz-crumb">
-          ULTRAZONE <span>›</span> Football <span>›</span> FIFA World Cup
+          MATCHDAY ATLAS <span>›</span> Football <span>›</span> FIFA World Cup
         </nav>
         <div className="uz-title-row">
           <div>

@@ -71,7 +71,7 @@ const Knockout = () => {
     <div className="uz-page ko-page">
       <div className="uz-wrap wide">
         <nav className="uz-crumb">
-          ULTRAZONE <span>›</span> Football <span>›</span> FIFA World Cup
+          MATCHDAY ATLAS <span>›</span> Football <span>›</span> FIFA World Cup
         </nav>
         <h1>2026 FIFA World Cup Knockout Stage</h1>
         <p className="uz-lead">

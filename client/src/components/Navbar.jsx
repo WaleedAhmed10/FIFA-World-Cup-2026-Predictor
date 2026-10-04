@@ -14,7 +14,7 @@ const Navbar = () => {
   return (
     <header className="uz-header">
       <div className="uz-header-top">
-        <Link to="/" className="uz-logo">ULTRAZONE</Link>
+        <Link to="/" className="uz-logo">MATCHDAY ATLAS</Link>
         <form className="uz-search" onSubmit={(e) => e.preventDefault()}>
           <input type="search" placeholder="Search" aria-label="Search" />
         </form>
